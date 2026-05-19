@@ -12,16 +12,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// 🔥 CHỐT CHẶN SSR + tránh init lại nhiều lần
-const app =
-  typeof window !== "undefined"
-    ? getApps().length
-      ? getApp()
-      : initializeApp(firebaseConfig)
-    : getApps().length
-      ? getApp()
-      : initializeApp(firebaseConfig);
+// 🔥 KHÔNG INIT MODULE LEVEL
+function getFirebaseApp() {
+  if (typeof window === "undefined") return null;
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+  return getApps().length ? getApp() : initializeApp(firebaseConfig);
+}
+
+export function getFirebaseAuth() {
+  const app = getFirebaseApp();
+  if (!app) throw new Error("Firebase only runs on client");
+  return getAuth(app);
+}
