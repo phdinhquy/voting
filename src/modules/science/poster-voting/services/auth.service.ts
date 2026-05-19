@@ -1,44 +1,27 @@
-export async function loginWithGoogle() {
-  if (typeof window === "undefined") return;
+"use client";
 
-  const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
-  const { getFirebaseAuth } = await import("@/firebase/client");
+import {
+  signInWithPopup,
+  OAuthProvider,
+  getAuth,
+} from "firebase/auth";
 
-  const auth = getFirebaseAuth();
-  const provider = new GoogleAuthProvider();
+import app from "@/firebase/client";
 
-  return signInWithPopup(auth, provider);
-}
+const auth = getAuth(app);
 
 export async function loginWithMicrosoft() {
-  if (typeof window === "undefined") return;
 
-  const { OAuthProvider, signInWithPopup, signOut } = await import("firebase/auth");
-  const { getFirebaseAuth } = await import("@/firebase/client");
+  const provider = new OAuthProvider(
+    "microsoft.com"
+  );
 
-  const auth = getFirebaseAuth();
-  const provider = new OAuthProvider("microsoft.com");
+  provider.setCustomParameters({
+    prompt: "select_account",
+  });
 
-  const result = await signInWithPopup(auth, provider);
-
-  const email = result.user.email || "";
-
-  const isValid =
-    email.endsWith("@smp.udn.vn") ||
-    email.endsWith("@st.smp.udn.vn");
-
-  if (!isValid) {
-    await signOut(auth);
-    throw new Error("Chỉ tài khoản TYD được phép đăng nhập.");
-  }
-
-  return result;
-}
-
-export async function logout() {
-  const { signOut } = await import("firebase/auth");
-  const { getFirebaseAuth } = await import("@/firebase/client");
-
-  const auth = getFirebaseAuth();
-  return signOut(auth);
+  return signInWithPopup(
+    auth,
+    provider
+  );
 }
